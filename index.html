@@ -9,32 +9,39 @@
 
 <style>
 body{
-  font-family:Arial,sans-serif;
+  font-family:Arial, sans-serif;
   background:black;
-  color:white;
-  text-align:center;
+  color:#fff;
   padding:20px;
+  text-align:center;
 }
 .panel{
+  background:black;
+  color:#fff;
+  padding:15px;
+  border-radius:12px;
   max-width:480px;
   margin:15px auto;
 }
 .hidden{display:none;}
-input,button,select{
+input, select, button{
   padding:10px;
+  font-family:Arial, sans-serif;
   border-radius:8px;
   border:none;
 }
 button{
-  background:maroon;
-  color:white;
-  font-weight:bold;
   cursor:pointer;
+  margin-top:10px;
+  text-transform:uppercase;
+  font-weight:bold;
+  color:#fff;
+  background:maroon;
 }
 .inputs{
   display:grid;
   grid-template-columns:repeat(4,70px);
-  gap:10px;
+  gap:12px;
   justify-content:center;
 }
 .inputs input{
@@ -47,23 +54,40 @@ button{
   background:white;
   color:black;
 }
-.inputs input:first-child{background:#7fd3ff;}
+.inputs input:first-child{
+  background:#7fd3ff;
+}
 .nuevo-cuadrado{
   width:70px;
   height:70px;
   font-size:34px;
+  font-weight:bold;
+  text-align:center;
   border:4px solid red;
+  margin:10px auto;
+  display:block;
+  border-radius:8px;
   background:#7fd3ff;
 }
-.favoritos,.explosivos{
+.favoritos, .explosivos{
   width:220px;
   min-height:60px;
-  margin:0 auto;
+  padding:15px;
+  border-radius:8px;
+  display:block;
   font-weight:bold;
+  text-align:center;
+  margin:0 auto;
   border:4px solid white;
 }
-.favoritos{background:green;font-size:26px;}
-.explosivos{background:red;font-size:48px;}
+.favoritos{
+  background:green;
+  font-size:26px;
+}
+.explosivos{
+  background:red;
+  font-size:48px;
+}
 </style>
 </head>
 
@@ -72,15 +96,15 @@ button{
 <h1>🎡 Sistema Premium S77</h1>
 
 <!-- LOGIN -->
-<div class="panel" id="loginPanel">
+<div class="panel" id="login">
   <h2>INGRESAR CLAVE</h2>
   <input id="claveInput" placeholder="Clave">
-  <br><br>
-  <button onclick="ingresar()">Ingresar</button>
+  <br>
+  <button onclick="login()">Ingresar</button>
   <p id="error" style="color:red;"></p>
 </div>
 
-<!-- ADMIN -->
+<!-- PANEL ADMIN -->
 <div class="panel hidden" id="adminPanel">
   <h2>ADMINISTRADOR</h2>
   <input id="nuevaClave" placeholder="Clave usuario">
@@ -89,14 +113,15 @@ button{
     <option value="7">7 días</option>
     <option value="30">30 días</option>
   </select>
-  <br><br>
+  <br>
   <button onclick="crearUsuario()">Crear usuario</button>
+  <h3>Usuarios activos</h3>
   <div id="listaUsuarios"></div>
 </div>
 
 <!-- SISTEMA -->
 <div class="panel hidden" id="s77">
-  <h2>ÚLTIMOS 16</h2>
+  <h2>ÚLTIMOS 16 NÚMEROS</h2>
   <div class="inputs">
     <input disabled><input disabled><input disabled><input disabled>
     <input disabled><input disabled><input disabled><input disabled>
@@ -104,9 +129,9 @@ button{
     <input disabled><input disabled><input disabled><input disabled>
   </div>
 
-  <h3>NUEVO</h3>
+  <h3>NUEVO NÚMERO</h3>
   <input id="nuevoNumero" type="number" class="nuevo-cuadrado">
-  <br><br>
+
   <button id="reiniciar">REINICIAR</button>
 
   <h3>FAVORITOS</h3>
@@ -121,94 +146,138 @@ button{
 const ADMIN="ADMIN-1407";
 let usuarios=JSON.parse(localStorage.getItem("usuarios")||"{}");
 
-function ingresar(){
+function login(){
   const clave=document.getElementById("claveInput").value;
   const ahora=Date.now();
 
   if(clave===ADMIN){
-    mostrar(true);
+    mostrarSistema(true);
     return;
   }
-  if(!usuarios[clave]) return error("Clave inválida");
-  if(ahora>usuarios[clave]) return error("Acceso vencido");
-
-  mostrar(false);
+  if(!usuarios[clave]){
+    error("Clave inválida");
+    return;
+  }
+  if(ahora>usuarios[clave]){
+    error("Acceso vencido");
+    return;
+  }
+  mostrarSistema(false);
 }
 
-function mostrar(esAdmin){
-  document.getElementById("loginPanel").classList.add("hidden");
+function mostrarSistema(admin){
+  document.getElementById("login").classList.add("hidden");
   document.getElementById("s77").classList.remove("hidden");
-  if(esAdmin){
+  if(admin){
     document.getElementById("adminPanel").classList.remove("hidden");
     renderUsuarios();
   }
 }
 
-function error(t){document.getElementById("error").innerText=t;}
+function error(txt){
+  document.getElementById("error").innerText=txt;
+}
 
 function crearUsuario(){
-  const c=nuevaClave.value;
-  const d=duracion.value;
+  const c=document.getElementById("nuevaClave").value;
+  const d=parseInt(document.getElementById("duracion").value);
   if(!c) return;
   usuarios[c]=Date.now()+d*86400000;
   localStorage.setItem("usuarios",JSON.stringify(usuarios));
-  nuevaClave.value="";
+  document.getElementById("nuevaClave").value="";
   renderUsuarios();
 }
 
 function renderUsuarios(){
-  listaUsuarios.innerHTML=Object.entries(usuarios)
-    .filter(u=>u[1]>Date.now())
-    .map(u=>`<p>${u[0]}</p>`).join("")||"—";
+  let h="",a=Date.now();
+  for(let u in usuarios){
+    if(usuarios[u]>a){
+      h+=`<p>${u} → vence ${new Date(usuarios[u]).toLocaleString()}</p>`;
+    }
+  }
+  document.getElementById("listaUsuarios").innerHTML=h||"—";
 }
 
 // ===== S77 =====
-const lotes3=[[0,13,28],[1,18,36],[2,10,35]];
-const lotes4=[[3,18,24,26]];
+const lotes3=[
+ [0,13,28],[1,18,36],[1,25,34],[2,10,35],[2,10,22],
+ [3,18,19],[4,10,22],[6,17,28],[7,19,27],
+ [7,9,32],[8,33,28],[8,26,35],[9,14,30],
+ [9,1,30],[9,25,36],[10,26,24],[11,22,33],
+ [17,20,35],[7,3,30]
+];
 
-const cas=[...document.querySelectorAll(".inputs input")];
+const lotes4=[
+ [3,18,24,26],[4,11,15,29],[5,12,16,21],
+ [6,10,13,31],[14,23,25,16]
+];
+
+const cas=[...document.querySelectorAll('.inputs input')];
+const nuevo=document.getElementById('nuevoNumero');
+const fav=document.getElementById('favoritos');
+const exp=document.getElementById('explosivos');
+const rein=document.getElementById('reiniciar');
+
 let ultimos=[];
 
-nuevoNumero.onchange=()=>{
-  let v=parseInt(nuevoNumero.value);
+nuevo.onchange=()=>{
+  const v=parseInt(nuevo.value);
   if(isNaN(v)) return;
   ultimos.unshift(v);
   if(ultimos.length>16) ultimos.pop();
-  render(); calcular();
-  nuevoNumero.value="";
+  render();
+  calcular();
+  nuevo.value="";
 };
 
-reiniciar.onclick=()=>{
+rein.onclick=()=>{
   ultimos=[];
   render();
-  favoritos.innerText="—";
-  explosivos.innerText="—";
+  fav.innerText="—";
+  exp.innerText="—";
 };
 
 function render(){
-  cas.forEach((c,i)=>c.value=ultimos[i]??"");
+  cas.forEach((c,i)=>{
+    c.value = ultimos[i]!==undefined ? ultimos[i] : "";
+  });
+}
+
+// 🔑 FUNCIÓN GENERAL — ZONA VÁLIDA 0 A 8
+function estaPosicionado(n){
+  for(let i=0;i<ultimos.length;i++){
+    if(ultimos[i]===n && i<=8) return true;
+  }
+  return false;
 }
 
 function calcular(){
   let cnt={};
   const sumar=n=>cnt[n]=(cnt[n]||0)+1;
 
+  // LOTES DE 3 → exactamente 2 posicionados
   lotes3.forEach(l=>{
-    let p=l.filter(n=>ultimos.includes(n));
-    if(p.length===2 && p.some(n=>ultimos.indexOf(n)<8))
-      sumar(l.find(n=>!p.includes(n)));
+    let pos=l.filter(n=>estaPosicionado(n));
+    if(pos.length===2){
+      sumar(l.find(n=>!pos.includes(n)));
+    }
   });
 
+  // LOTES DE 4 → exactamente 2 posicionados
   lotes4.forEach(l=>{
-    let p=l.filter(n=>ultimos.includes(n));
-    if(p.length===2 && p.some(n=>ultimos.indexOf(n)<8))
-      l.filter(n=>!p.includes(n)).forEach(sumar);
+    let pos=l.filter(n=>estaPosicionado(n));
+    if(pos.length===2){
+      l.filter(n=>!pos.includes(n)).forEach(sumar);
+    }
   });
 
   let f=[],e=[];
-  for(let n in cnt) cnt[n]>1?e.push(n):f.push(n);
-  favoritos.innerText=f.join(", ")||"—";
-  explosivos.innerText=e.join(", ")||"—";
+  for(let n in cnt){
+    cnt[n]>1 ? e.push(n) : f.push(n);
+  }
+
+  fav.innerText=f.length?f.join(", "):"—";
+  exp.innerText=e.length?e.join(", "):"—";
 }
 </script>
 
