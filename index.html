@@ -9,39 +9,32 @@
 
 <style>
 body{
-  font-family:Arial, sans-serif;
+  font-family:Arial,sans-serif;
   background:black;
-  color:#fff;
-  padding:20px;
+  color:white;
   text-align:center;
+  padding:20px;
 }
 .panel{
-  background:black;
-  color:#fff;
-  padding:15px;
-  border-radius:12px;
   max-width:480px;
   margin:15px auto;
 }
 .hidden{display:none;}
-input, select, button{
+input,button,select{
   padding:10px;
-  font-family:Arial, sans-serif;
   border-radius:8px;
   border:none;
 }
 button{
-  cursor:pointer;
-  margin-top:10px;
-  text-transform:uppercase;
-  font-weight:bold;
-  color:#fff;
   background:maroon;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
 }
 .inputs{
   display:grid;
   grid-template-columns:repeat(4,70px);
-  gap:12px;
+  gap:10px;
   justify-content:center;
 }
 .inputs input{
@@ -59,21 +52,14 @@ button{
   width:70px;
   height:70px;
   font-size:34px;
-  font-weight:bold;
-  text-align:center;
   border:4px solid red;
-  margin:10px auto;
-  border-radius:8px;
   background:#7fd3ff;
 }
 .favoritos,.explosivos{
   width:220px;
   min-height:60px;
-  padding:15px;
-  border-radius:8px;
-  font-weight:bold;
-  text-align:center;
   margin:0 auto;
+  font-weight:bold;
   border:4px solid white;
 }
 .favoritos{background:green;font-size:26px;}
@@ -85,14 +71,16 @@ button{
 
 <h1>🎡 Sistema Premium S77</h1>
 
-<div class="panel" id="login">
+<!-- LOGIN -->
+<div class="panel" id="loginPanel">
   <h2>INGRESAR CLAVE</h2>
   <input id="claveInput" placeholder="Clave">
-  <br>
-  <button onclick="login()">Ingresar</button>
+  <br><br>
+  <button onclick="ingresar()">Ingresar</button>
   <p id="error" style="color:red;"></p>
 </div>
 
+<!-- ADMIN -->
 <div class="panel hidden" id="adminPanel">
   <h2>ADMINISTRADOR</h2>
   <input id="nuevaClave" placeholder="Clave usuario">
@@ -101,14 +89,14 @@ button{
     <option value="7">7 días</option>
     <option value="30">30 días</option>
   </select>
-  <br>
+  <br><br>
   <button onclick="crearUsuario()">Crear usuario</button>
-  <h3>Usuarios activos</h3>
   <div id="listaUsuarios"></div>
 </div>
 
+<!-- SISTEMA -->
 <div class="panel hidden" id="s77">
-  <h2>ÚLTIMOS 16 NÚMEROS</h2>
+  <h2>ÚLTIMOS 16</h2>
   <div class="inputs">
     <input disabled><input disabled><input disabled><input disabled>
     <input disabled><input disabled><input disabled><input disabled>
@@ -116,9 +104,9 @@ button{
     <input disabled><input disabled><input disabled><input disabled>
   </div>
 
-  <h3>NUEVO NÚMERO</h3>
+  <h3>NUEVO</h3>
   <input id="nuevoNumero" type="number" class="nuevo-cuadrado">
-
+  <br><br>
   <button id="reiniciar">REINICIAR</button>
 
   <h3>FAVORITOS</h3>
@@ -133,36 +121,50 @@ button{
 const ADMIN="ADMIN-1407";
 let usuarios=JSON.parse(localStorage.getItem("usuarios")||"{}");
 
-function login(){
-  const clave=claveInput.value;
+function ingresar(){
+  const clave=document.getElementById("claveInput").value;
   const ahora=Date.now();
-  if(clave===ADMIN){mostrar(true);return;}
+
+  if(clave===ADMIN){
+    mostrar(true);
+    return;
+  }
   if(!usuarios[clave]) return error("Clave inválida");
   if(ahora>usuarios[clave]) return error("Acceso vencido");
+
   mostrar(false);
 }
-function mostrar(admin){
-  login.classList.add("hidden");
-  s77.classList.remove("hidden");
-  if(admin){adminPanel.classList.remove("hidden");renderUsuarios();}
+
+function mostrar(esAdmin){
+  document.getElementById("loginPanel").classList.add("hidden");
+  document.getElementById("s77").classList.remove("hidden");
+  if(esAdmin){
+    document.getElementById("adminPanel").classList.remove("hidden");
+    renderUsuarios();
+  }
 }
+
 function error(t){document.getElementById("error").innerText=t;}
+
 function crearUsuario(){
-  if(!nuevaClave.value) return;
-  usuarios[nuevaClave.value]=Date.now()+duracion.value*86400000;
+  const c=nuevaClave.value;
+  const d=duracion.value;
+  if(!c) return;
+  usuarios[c]=Date.now()+d*86400000;
   localStorage.setItem("usuarios",JSON.stringify(usuarios));
-  nuevaClave.value="";renderUsuarios();
+  nuevaClave.value="";
+  renderUsuarios();
 }
+
 function renderUsuarios(){
   listaUsuarios.innerHTML=Object.entries(usuarios)
     .filter(u=>u[1]>Date.now())
-    .map(u=>`<p>${u[0]} → vence ${new Date(u[1]).toLocaleString()}</p>`)
-    .join("")||"—";
+    .map(u=>`<p>${u[0]}</p>`).join("")||"—";
 }
 
-// ===== SISTEMA S77 =====
-const lotes3=[[0,13,28],[1,18,36],[1,25,34],[2,10,35],[2,10,22],[3,18,19],[4,10,22],[6,17,28],[7,19,27],[7,9,32],[8,33,28],[8,26,35],[9,14,30],[9,1,30],[9,25,36],[10,26,24],[11,22,33],[17,20,35],[7,3,30]];
-const lotes4=[[3,18,24,26],[4,11,15,29],[5,12,16,21],[6,10,13,31],[14,23,25,16]];
+// ===== S77 =====
+const lotes3=[[0,13,28],[1,18,36],[2,10,35]];
+const lotes4=[[3,18,24,26]];
 
 const cas=[...document.querySelectorAll(".inputs input")];
 let ultimos=[];
@@ -172,10 +174,16 @@ nuevoNumero.onchange=()=>{
   if(isNaN(v)) return;
   ultimos.unshift(v);
   if(ultimos.length>16) ultimos.pop();
-  render(); calcular(); nuevoNumero.value="";
+  render(); calcular();
+  nuevoNumero.value="";
 };
 
-reiniciar.onclick=()=>{ultimos=[];render();favoritos.innerText="—";explosivos.innerText="—";};
+reiniciar.onclick=()=>{
+  ultimos=[];
+  render();
+  favoritos.innerText="—";
+  explosivos.innerText="—";
+};
 
 function render(){
   cas.forEach((c,i)=>c.value=ultimos[i]??"");
@@ -185,26 +193,16 @@ function calcular(){
   let cnt={};
   const sumar=n=>cnt[n]=(cnt[n]||0)+1;
 
-  // LOTES DE 3
   lotes3.forEach(l=>{
     let p=l.filter(n=>ultimos.includes(n));
-    if(p.length===2){
-      let pos=p.map(n=>ultimos.indexOf(n));
-      if(pos.some(x=>x<8)){
-        sumar(l.find(n=>!p.includes(n)));
-      }
-    }
+    if(p.length===2 && p.some(n=>ultimos.indexOf(n)<8))
+      sumar(l.find(n=>!p.includes(n)));
   });
 
-  // LOTES DE 4 (2 POSICIONADOS → 2 FALTANTES)
   lotes4.forEach(l=>{
     let p=l.filter(n=>ultimos.includes(n));
-    if(p.length===2){
-      let pos=p.map(n=>ultimos.indexOf(n));
-      if(pos.some(x=>x<8)){
-        l.filter(n=>!p.includes(n)).forEach(sumar);
-      }
-    }
+    if(p.length===2 && p.some(n=>ultimos.indexOf(n)<8))
+      l.filter(n=>!p.includes(n)).forEach(sumar);
   });
 
   let f=[],e=[];
