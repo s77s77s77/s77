@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sistema Premium S77</title>
+
+<!-- ÍCONO -->
+<link rel="icon" href="icono.png">
+<link rel="apple-touch-icon" href="icono.png">
+
+<style>
+body{
+  font-family:Arial, sans-serif;
+  background:black;
+  color:#fff;
+  padding:20px;
+  text-align:center;
+}
+.panel{
+  background:black;
+  color:#fff;
+  padding:15px;
+  border-radius:12px;
+  max-width:480px;
+  margin:15px auto;
+}
+.hidden{display:none;}
+input, select, button{
+  padding:10px;
+  font-family:Arial, sans-serif;
+  border-radius:8px;
+  border:none;
+}
+button{
+  cursor:pointer;
+  margin-top:10px;
+  text-transform:uppercase;
+  font-weight:bold;
+  color:#fff;
+  background:maroon;
+}
+.inputs{
+  display:grid;
+  grid-template-columns:repeat(4,70px);
+  gap:12px;
+  justify-content:center;
+}
+.inputs input{
+  width:70px;
+  height:70px;
+  font-size:34px;
+  font-weight:bold;
+  text-align:center;
+  border:4px solid red;
+  background:white;
+  color:black;
+}
+.inputs input:first-child{
+  background:#7fd3ff;
+}
+.nuevo-cuadrado{
+  width:70px;
+  height:70px;
+  font-size:34px;
+  font-weight:bold;
+  text-align:center;
+  border:4px solid red;
+  margin:10px auto;
+  display:block;
+  border-radius:8px;
+  background:#7fd3ff;
+}
+.favoritos, .explosivos{
+  width:220px;
+  min-height:60px;
+  padding:15px;
+  border-radius:8px;
+  display:block;
+  font-weight:bold;
+  text-align:center;
+  margin:0 auto;
+  border:4px solid white;
+}
+.favoritos{
+  background:green;
+  font-size:26px;
+}
+.explosivos{
+  background:red;
+  font-size:48px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎡 Sistema Premium S77</h1>
+
+<!-- LOGIN -->
+<div class="panel" id="login">
+  <h2>INGRESAR CLAVE</h2>
+  <input id="claveInput" placeholder="Clave">
+  <br>
+  <button onclick="login()">Ingresar</button>
+  <p id="error" style="color:red;"></p>
+</div>
+
+<!-- PANEL ADMIN -->
+<div class="panel hidden" id="adminPanel">
+  <h2>ADMINISTRADOR</h2>
+  <input id="nuevaClave" placeholder="Clave usuario">
+  <select id="duracion">
+    <option value="1">1 día</option>
+    <option value="7">7 días</option>
+    <option value="30">30 días</option>
+  </select>
+  <br>
+  <button onclick="crearUsuario()">Crear usuario</button>
+  <h3>Usuarios activos</h3>
+  <div id="listaUsuarios"></div>
+</div>
+
+<!-- SISTEMA -->
+<div class="panel hidden" id="s77">
+  <h2>ÚLTIMOS 16 NÚMEROS</h2>
+  <div class="inputs">
+    <input disabled><input disabled><input disabled><input disabled>
+    <input disabled><input disabled><input disabled><input disabled>
+    <input disabled><input disabled><input disabled><input disabled>
+    <input disabled><input disabled><input disabled><input disabled>
+  </div>
+
+  <h3>NUEVO NÚMERO</h3>
+  <input id="nuevoNumero" type="number" class="nuevo-cuadrado">
+
+  <button id="reiniciar">REINICIAR</button>
+
+  <h3>FAVORITOS</h3>
+  <div class="favoritos" id="favoritos">—</div>
+
+  <h3>EXPLOSIVOS</h3>
+  <div class="explosivos" id="explosivos">—</div>
+</div>
+
+<script>
+// ===== SEGURIDAD =====
+const ADMIN="ADMIN-1407";
+let usuarios=JSON.parse(localStorage.getItem("usuarios")||"{}");
+
+function login(){
+  const clave=document.getElementById("claveInput").value;
+  const ahora=Date.now();
+
+  if(clave===ADMIN){
+    mostrarSistema(true);
+    return;
+  }
+  if(!usuarios[clave]){
+    error("Clave inválida");
+    return;
+  }
+  if(ahora>usuarios[clave]){
+    error("Acceso vencido");
+    return;
+  }
+  mostrarSistema(false);
+}
+
+function mostrarSistema(admin){
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("s77").classList.remove("hidden");
+  if(admin){
+    document.getElementById("adminPanel").classList.remove("hidden");
+    renderUsuarios();
+  }
+}
+
+function error(txt){
+  document.getElementById("error").innerText=txt;
+}
+
+function crearUsuario(){
+  const c=document.getElementById("nuevaClave").value;
+  const d=parseInt(document.getElementById("duracion").value);
+  if(!c) return;
+  usuarios[c]=Date.now()+d*86400000;
+  localStorage.setItem("usuarios",JSON.stringify(usuarios));
+  document.getElementById("nuevaClave").value="";
+  renderUsuarios();
+}
+
+function renderUsuarios(){
+  let h="",a=Date.now();
+  for(let u in usuarios){
+    if(usuarios[u]>a){
+      h+=`<p>${u} → vence ${new Date(usuarios[u]).toLocaleString()}</p>`;
+    }
+  }
+  document.getElementById("listaUsuarios").innerHTML=h||"—";
+}
+
+// ===== S77 =====
+const lotes3=[
+ [0,13,28],[1,18,36],[1,25,34],[2,10,35],[2,10,22],
+ [3,18,19],[4,10,22],[6,17,28],[7,19,27],
+ [7,9,32],[8,33,28],[8,26,35],[9,14,30],
+ [9,1,30],[9,25,36],[10,26,24],[11,22,33],
+ [17,20,35],[7,3,30]
+];
+
+const lotes4=[
+ [3,18,24,26],[4,11,15,29],[5,12,16,21],
+ [6,10,13,31],[14,23,25,16]
+];
+
+const cas=[...document.querySelectorAll('.inputs input')];
+const nuevo=document.getElementById('nuevoNumero');
+const fav=document.getElementById('favoritos');
+const exp=document.getElementById('explosivos');
+const rein=document.getElementById('reiniciar');
+
+let ultimos=[];
+
+nuevo.onchange=()=>{
+  const v=parseInt(nuevo.value);
+  if(isNaN(v)) return;
+  ultimos.unshift(v);
+  if(ultimos.length>16) ultimos.pop();
+  render();
+  calcular();
+  nuevo.value="";
+};
+
+rein.onclick=()=>{
+  ultimos=[];
+  render();
+  fav.innerText="—";
+  exp.innerText="—";
+};
+
+function render(){
+  cas.forEach((c,i)=>{
+    c.value = ultimos[i]!==undefined ? ultimos[i] : "";
+  });
+}
+
+function calcular(){
+  let cnt={};
+  let presentes=[...new Set(ultimos)];
+  const sumar=n=>cnt[n]=(cnt[n]||0)+1;
+
+  lotes3.forEach(l=>{
+    let p=l.filter(n=>presentes.includes(n));
+    if(p.length===2){
+      let falt=l.find(n=>!p.includes(n));
+      sumar(falt);
+    }
+  });
+
+  lotes4.forEach(l=>{
+    let p=l.filter(n=>presentes.includes(n));
+    if(p.length===3){
+      l.filter(n=>!p.includes(n)).forEach(sumar);
+    }
+  });
+
+  let f=[],e=[];
+  for(let n in cnt){
+    cnt[n]>1 ? e.push(n) : f.push(n);
+  }
+
+  fav.innerText=f.length?f.join(", "):"—";
+  exp.innerText=e.length?e.join(", "):"—";
+}
+</script>
+
+</body>
+</html>
