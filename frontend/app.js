@@ -1,6 +1,4 @@
-// ⚠️ CAMBIÁ ESTA URL CUANDO TENGAS EL BACKEND EN RENDER
-// Por ahora dejala así, después la reemplazamos
-const API = "https://TU_BACKEND.onrender.com";
+const API = "https://s77-frontend.onrender.com";
 
 async function enviar() {
   const input = document.getElementById("nuevo");
