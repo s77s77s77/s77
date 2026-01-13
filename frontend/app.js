@@ -1,4 +1,4 @@
-const API = "https://s77-frontend.onrender.com";
+const API = "https://s77.onrender.com";
 
 async function enviar() {
   const input = document.getElementById("nuevo");
