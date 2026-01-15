@@ -1,5 +1,34 @@
-body{background:black;color:white;font-family:Arial;text-align:center}
-input,button{padding:10px;margin:5px}
-#favoritos{background:green}
-#repetidos{background:#222}
-#error{color:red}
+body{
+  background:black;
+  color:white;
+  font-family:Arial;
+  text-align:center;
+}
+
+input, button{
+  padding:10px;
+  margin:5px;
+}
+
+#login{
+  background:#111;
+  padding:20px;
+  max-width:300px;
+  margin:40px auto;
+  border:2px solid white;
+}
+
+#login input{
+  background:white;
+  color:black;
+}
+
+#login button{
+  background:maroon;
+  color:white;
+}
+
+#error{
+  color:red;
+  margin-top:10px;
+}
