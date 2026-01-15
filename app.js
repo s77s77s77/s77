@@ -1,4 +1,4 @@
-const API="PEGAR_URL_DE_RENDER";
+const API="https://s77.onrender.com";
 
 async function login(){
   const clave=document.getElementById("clave").value;
