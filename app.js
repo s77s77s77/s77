@@ -1,46 +1,20 @@
-const API = "https://s77.onrender.com";
+async function login() {
+  const clave = document.getElementById("clave").value;
+  const error = document.getElementById("error");
 
-async function enviar() {
-  const input = document.getElementById("nuevo");
-  const numero = parseInt(input.value);
-
-  if (isNaN(numero)) return;
-
-  const res = await fetch(`${API}/nuevo-numero`, {
+  const res = await fetch(`${API}/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ numero })
+    body: JSON.stringify({ clave })
   });
 
   const data = await res.json();
-  render(data);
-  input.value = "";
-}
 
-async function reiniciar() {
-  await fetch(`${API}/reiniciar`, { method: "POST" });
-  location.reload();
-}
+  if (!res.ok) {
+    error.innerText = data.error || "Error";
+    return;
+  }
 
-function render(data) {
-  const fichas = document.getElementById("fichas");
-  const favoritos = document.getElementById("favoritos");
-  const repetidos = document.getElementById("repetidos");
-  const numeros = document.getElementById("numeros");
-
-  fichas.innerText = data.fichas;
-
-  favoritos.innerText =
-    data.favoritos.length > 0 ? data.favoritos.join(", ") : "—";
-
-  repetidos.innerHTML = "";
-  data.repetidos.forEach((lista, i) => {
-    const div = document.createElement("div");
-    div.innerText = `Repetido ${i + 1}: ${lista.join(", ") || "—"}`;
-    repetidos.appendChild(div);
-  });
-
-  numeros.innerText = data.sistemaActivo
-    ? data.ultimos5.join(" | ")
-    : data.ultimos16.join(" | ");
-}
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
+    }
