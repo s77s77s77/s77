@@ -1,4 +1,4 @@
-const API="https://s77.onrender.com";
+const API="https://s77s77s77.github.io/s77/com";
 
 async function login(){
   const clave=document.getElementById("clave").value;
