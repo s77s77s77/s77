@@ -79,4 +79,3 @@ app.get("/estado", (req, res) => {
 app.listen(PORT, () => {
   console.log("Backend S77 activo");
 });
-      
